@@ -31,22 +31,28 @@ samtools index b1_sorted.bam
 
 # Step 5: Detecting structural variants and indels with DELLY
 # DELLY is a tool used to detect structural variants (SVs) and indels (insertions and deletions) from the aligned BAM files.
-# Here, we focus on detecting deletions (DEL) and inversions (INV). If we wanted to find other types of structural variants,
-# we would modify the variant type in the DELLY command.
+# Here, we focus on detecting deletions (DEL) and inversions (INV). You can modify the variant type in the DELLY command as needed.
 echo "Step 5: Detecting structural variants and indels with DELLY"
 delly call -t DEL -g reference_genome.fasta -o b1_deletion.vcf b1_sorted.bam
 delly call -t INV -g reference_genome.fasta -o b1_inversion.vcf b1_sorted.bam
 
-# Step 6: Annotating variants using ANNOVAR
+# Step 6: Filtering variants using VCFtools
+# Filtering the variants based on quality criteria, such as quality score or depth. This helps remove low-quality variants.
+echo "Step 6: Filtering variants with VCFtools"
+vcftools --vcf b1_deletion.vcf --minQ 30 --minDP 10 --recode --out b1_deletion_filtered
+vcftools --vcf b1_inversion.vcf --minQ 30 --minDP 10 --recode --out b1_inversion_filtered
+
+# Step 7: Annotating variants using ANNOVAR
 # After detecting the variants, we use ANNOVAR to annotate them. Annotation adds functional information to the variants, such as
 # which genes are affected and whether the variants have clinical significance or any known effects.
 # ANNOVAR can also provide information on how the variant might affect gene function.
-echo "Step 6: Annotating variants using ANNOVAR"
-./table_annovar.pl b1_deletion.vcf humandb/ -buildver hg19 -out b1_annotated -remove -protocol refGene,cytoBand,exac03 -operation g,r,f -nastring .
+echo "Step 7: Annotating variants using ANNOVAR"
+./table_annovar.pl b1_deletion_filtered.recode.vcf humandb/ -buildver hg19 -out b1_deletion_annotated -remove -protocol refGene,cytoBand,exac03 -operation g,r,f -nastring .
+./table_annovar.pl b1_inversion_filtered.recode.vcf humandb/ -buildver hg19 -out b1_inversion_annotated -remove -protocol refGene,cytoBand,exac03 -operation g,r,f -nastring .
 
-# Step 7: Visualizing and interpreting results in R
+# Step 8: Visualizing and interpreting results in R
 # Finally, we visualize the annotated variants using R. We use ggplot2 to create a bar plot that shows how the variants are distributed
 # across different functional categories (such as "synonymous", "nonsynonymous", etc.). This helps us better understand the impact
 # of the variants on the genes and their functions.
-echo "Step 7: Visualizing and interpreting results in R"
+echo "Step 8: Visualizing and interpreting results in R"
 Rscript visualization.R

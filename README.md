@@ -1,4 +1,4 @@
-# NGS_Variant_analysis
+# NGS Variant analysis
 This pipeline processes raw sequencing data to detect and annotate variants, helping interpret their biological relevance.
 
 Workflow summary:

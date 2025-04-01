@@ -3,7 +3,6 @@ library(ggplot2)
 
 variants <- read.table("b1_annotated.hg19_multianno.txt", header=TRUE, sep="\t")
 
-# Generate a bar plot to visualize variant distribution by functional category
 ggplot(variants, aes(x=Func.refGene)) +
   geom_bar() +
   theme_minimal() +
